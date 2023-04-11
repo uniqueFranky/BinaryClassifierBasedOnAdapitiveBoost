@@ -8,12 +8,12 @@ if __name__ == '__main__':
         'max_iter': 100
     }, feature_path='data.csv', label_path='targets.csv')
 
-    for base in [5, 10, 100]:
+    for base in [1, 5, 10, 100]:
         print(f'base = %d' % base)
         err = 0
         for fold in range(1, 11):
             booster.train(fold, base)
-            err += booster.valid(fold)
+            err += booster.valid(fold, base)
         print(f'tot err = %f' % (err / 10))
 
 

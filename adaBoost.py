@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 
+import fileWriter
 from baseLearner import BaseLearner
 from dataManager import DataManager
 
@@ -59,7 +60,7 @@ class AdaBooster:
             for i in range(len(self.distribution)):
                 self.distribution[i] /= tot_distribution
 
-    def valid(self, fold_id: int):
+    def valid(self, fold_id: int, num_base: int):
         _, _, valid_x, valid_y = self.data_manager.get_folded_data(fold_id)
         pred = np.array([0] * valid_x.shape[0], dtype=float)
         for i in range(len(self.learner_sequence)):
@@ -75,4 +76,5 @@ class AdaBooster:
                 err += 1
         err /= valid_y.shape[0]
         print(f'fold = %d, error rate = %f' % (fold_id, err))
+        fileWriter.write(valid_x, pred, num_base, fold_id)
         return err

@@ -1,23 +1,26 @@
+import math
+
 import numpy as np
 from baseLearner import BaseLearner
 
 
-def sigmoid(x: np.ndarray) -> np.ndarray:
-    return 1 / (1 + np.exp(-x))
+def sigmoid(x: float) -> float:
+    return 1 / (1 + math.exp(-x))
 
 
 class LogisticRegressionClassifier(BaseLearner):
-    def __init__(self, num_features, lr=0.001, max_iter=100):
-        super().__init__()
-        self.num_features = num_features
-        self.w = np.zeros(num_features, dtype=float)
-        self.lr = lr
-        self.max_iter = max_iter
+    def __init__(self, config):
+        super().__init__(config)
+        self.num_features = config['num_features']
+        self.w = np.zeros(self.num_features, dtype=float)
+        self.lr = config['lr']
+        self.max_iter = config['max_iter']
 
     def fit(self, x: np.ndarray, y: np.ndarray):
         for _ in range(self.max_iter):
             grad = np.zeros(self.num_features, dtype=float)
             for i, feature in enumerate(x):
+                # print(y[i])
                 grad += (sigmoid(y[i] * np.dot(self.w, feature)) - 1) * y[i] * feature
             self.w -= self.lr * grad
 

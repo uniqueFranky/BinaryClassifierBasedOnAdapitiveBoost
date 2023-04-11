@@ -47,18 +47,17 @@ class DataManager:
         return train_x, train_y, valid_x, valid_y
 
     @staticmethod
-    def generate_weighted_data(x: np.ndarray, y: np.ndarray, weight: list, multiple: int = 1) -> (np.ndarray, np.ndarray):
+    def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: int = 1) -> (np.ndarray, np.ndarray):
         """
         generate new dataset based on the provided weight
         :param x:
         :param y:
-        :param weight:
+        :param distribution:
         :param multiple: the size of the generated dataset divided by the size of the original dataset
         :return:
         """
-        assert x.shape[0] == y.shape[0] and x.shape[0] == len(weight)
-
-        prefix_sum = weight.copy()
+        assert x.shape[0] == y.shape[0]
+        prefix_sum = distribution.copy()
         for i in range(1, len(prefix_sum)):
             prefix_sum[i] += prefix_sum[i - 1]
 
@@ -73,7 +72,7 @@ class DataManager:
                 # if the random value falls in such an interval, the corresponding tuple should appear in the dataset
                 if rand <= prefix_sum[i]:
                     generated_x.append(x[i].tolist())
-                    generated_y.append(x[i].tolist())
+                    generated_y.append(y[i])
 
                     break
         return np.array(generated_x), np.array(generated_y)

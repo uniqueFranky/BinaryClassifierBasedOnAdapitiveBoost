@@ -10,10 +10,10 @@ if __name__ == '__main__':
 
     for base in [1, 5, 10, 100]:
         print(f'base = %d' % base)
-        err = 0
+        acc = 0
         for fold in range(1, 11):
             booster.train(fold, base)
-            err += booster.valid(fold, base)
-        print(f'tot err = %f' % (err / 10))
+            acc += booster.valid(fold, base)
+        print(f'tot acc = %f' % (acc / 10))
 
 

@@ -7,7 +7,7 @@ import numpy as np
 class DataManager:
     def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv'):
         self.x = np.genfromtxt(data_path, delimiter=',')
-        self.y = np.genfromtxt(targets_path, delimiter=',', dtype=int)
+        self.y = np.genfromtxt(targets_path, delimiter=',', dtype=float)
         # standardize
         for i in range(self.x.shape[1]):
             avg = sum(self.x[:, i]) / self.x.shape[0]
@@ -26,7 +26,6 @@ class DataManager:
         for i in range(self.y.shape[0]):
             if self.y[i] == 0:
                 self.y[i] = -1
-
     def get_folded_data(self, fold_id: int) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
         """
         load data according to 10-Fold Cross Validation Technique

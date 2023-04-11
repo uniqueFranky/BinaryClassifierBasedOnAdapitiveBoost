@@ -70,11 +70,11 @@ class AdaBooster:
                 pred[i] = 1
             else:
                 pred[i] = -1
-        err = 0.0
+        acc = 0.0
         for i in range(len(pred)):
-            if pred[i] != valid_y[i]:
-                err += 1
-        err /= valid_y.shape[0]
-        print(f'fold = %d, error rate = %f' % (fold_id, err))
+            if pred[i] == valid_y[i]:
+                acc += 1
+        acc /= valid_y.shape[0]
+        print(f'fold = %d, acc rate = %f' % (fold_id, acc))
         fileWriter.write(valid_x, pred, num_base, fold_id)
-        return err
+        return acc

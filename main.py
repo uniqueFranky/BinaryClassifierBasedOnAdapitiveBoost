@@ -1,7 +1,15 @@
 import dataManager
-
+from logisticRegression import LogisticRegressionClassifier
 if __name__ == '__main__':
     dm = dataManager.DataManager()
-    tx, ty, vx, vy = dm.get_folded_data(1)
-    x, y = dataManager.DataManager.generate_weighted_data(tx, ty, [1 / tx.shape[0]] * tx.shape[0], multiple=2)
-    print(x)
+    for fold_id in range(1, 11):
+        tx, ty, vx, vy = dm.get_folded_data(fold_id)
+        clf = LogisticRegressionClassifier(tx.shape[1] - 1)
+        clf.fit(tx[:, 1:], ty)
+        pred = clf.predict(vx[:, 1:])
+        err = 0
+        for i in range(len(pred)):
+            if pred[i] != vy[i]:
+                err += 1
+        print(f'fold %d' % fold_id)
+        print(f'error rate =  %f' % (err / len(pred)))

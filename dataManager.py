@@ -1,4 +1,6 @@
 import math
+import random
+
 import numpy as np
 
 
@@ -16,7 +18,8 @@ class DataManager:
             var = math.sqrt(var)
             self.x[:, i] = (self.x[:, i] - avg) / var
 
-        idx = np.array([i for i in range(1, self.x.shape[0] + 1)], dtype=int)
+        # insert indices of data
+        idx = np.array([i for i in range(self.x.shape[0])], dtype=int)
         self.x = np.insert(self.x, 0, idx, axis=1)
 
         # replace 0 with -1 in labels
@@ -42,3 +45,35 @@ class DataManager:
         train_y = np.append(train_y, self.y[fold_id * num_tuples_per_fold: self.y.shape[0]], axis=0)
 
         return train_x, train_y, valid_x, valid_y
+
+    @staticmethod
+    def generate_weighted_data(x: np.ndarray, y: np.ndarray, weight: list, multiple: int = 1) -> (np.ndarray, np.ndarray):
+        """
+        generate new dataset based on the provided weight
+        :param x:
+        :param y:
+        :param weight:
+        :param multiple: the size of the generated dataset divided by the size of the original dataset
+        :return:
+        """
+        assert x.shape[0] == y.shape[0] and x.shape[0] == len(weight)
+
+        prefix_sum = weight.copy()
+        for i in range(1, len(prefix_sum)):
+            prefix_sum[i] += prefix_sum[i - 1]
+
+        generated_x = []
+        generated_y = []
+        num_samples = multiple * x.shape[0]
+
+        # generate new dataset using the weight as distribution
+        for _ in range(num_samples):
+            rand = random.random()
+            for i in range(x.shape[0]):
+                # if the random value falls in such an interval, the corresponding tuple should appear in the dataset
+                if rand <= prefix_sum[i]:
+                    generated_x.append(x[i].tolist())
+                    generated_y.append(x[i].tolist())
+
+                    break
+        return np.array(generated_x), np.array(generated_y)

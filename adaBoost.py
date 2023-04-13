@@ -15,7 +15,7 @@ class AdaBooster:
         :param feature_path: the file path to load features
         :param label_path: the file path to load labels
         """
-        self.data_manager = DataManager(feature_path, label_path)
+        self.data_manager = DataManager(feature_path, label_path, standardize=learner_config['standardize'])
         self.learner_type = learner_type
         self.learner_config = learner_config
         self.learner_sequence = []

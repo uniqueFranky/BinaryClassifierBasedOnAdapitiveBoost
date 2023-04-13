@@ -5,18 +5,19 @@ import numpy as np
 
 
 class DataManager:
-    def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv'):
+    def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv', standardize: bool = True):
         self.x = np.genfromtxt(data_path, delimiter=',')
         self.y = np.genfromtxt(targets_path, delimiter=',', dtype=float)
         # standardize
-        for i in range(self.x.shape[1]):
-            avg = sum(self.x[:, i]) / self.x.shape[0]
-            var = 0
-            for j in range(self.x.shape[0]):
-                var += (self.x[j][i] - avg) ** 2
-            var /= self.x.shape[0]
-            var = math.sqrt(var)
-            self.x[:, i] = (self.x[:, i] - avg) / var
+        if standardize:
+            for i in range(self.x.shape[1]):
+                avg = sum(self.x[:, i]) / self.x.shape[0]
+                var = 0
+                for j in range(self.x.shape[0]):
+                    var += (self.x[j][i] - avg) ** 2
+                var /= self.x.shape[0]
+                var = math.sqrt(var)
+                self.x[:, i] = (self.x[:, i] - avg) / var
 
         # insert indices of data
         idx = np.array([i for i in range(self.x.shape[0])], dtype=int)
@@ -48,7 +49,7 @@ class DataManager:
 
     @staticmethod
     def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: float = 1) -> (
-    np.ndarray, np.ndarray):
+            np.ndarray, np.ndarray):
         """
         generate new dataset based on the provided weight
         :param x:

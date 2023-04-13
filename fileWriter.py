@@ -14,4 +14,4 @@ def write(x: np.ndarray, y: np.ndarray, base: int, fold: int, path: str = 'exper
     assert x.shape[0] == y.shape[0]
     with open(path + f'/base%d_fold%d.csv' % (base, fold), 'w') as f:
         for i in range(x.shape[0]):
-            f.write(f'%d,%.d\n' % (int(x[i][0]) + 1, 1 if int(y[i]) == 1 else 0))
+            f.write(f'%d,%d\n' % (int(x[i][0]) + 1, 1 if int(y[i]) == 1 else 0))

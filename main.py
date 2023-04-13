@@ -1,13 +1,14 @@
 import dataManager
 from logisticRegression import LogisticRegressionClassifier
+from decisionStump import DecisionStump
 from adaBoost import AdaBooster
 
 if __name__ == '__main__':
-    booster = AdaBooster(LogisticRegressionClassifier, learner_config={
+    booster = AdaBooster(DecisionStump, learner_config={
         'lr': 0.0005,
         'max_iter': 100,
         'sample_multiple': 1,
-        'use_distributed_dataset': True,
+        'use_distributed_dataset': False,
         'write_to_file': False
     }, feature_path='data.csv', label_path='targets.csv')
 

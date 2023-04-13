@@ -16,7 +16,7 @@ class LogisticRegressionClassifier(BaseLearner):
         self.lr = config['lr']
         self.max_iter = config['max_iter']
 
-    def fit(self, x: np.ndarray, y: np.ndarray):
+    def fit(self, x: np.ndarray, y: np.ndarray, distribution: np.ndarray):
         for _ in range(self.max_iter):
             grad = np.zeros(self.num_features, dtype=float)
             for i, feature in enumerate(x):

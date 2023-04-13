@@ -26,6 +26,7 @@ class DataManager:
         for i in range(self.y.shape[0]):
             if self.y[i] == 0:
                 self.y[i] = -1
+
     def get_folded_data(self, fold_id: int) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
         """
         load data according to 10-Fold Cross Validation Technique
@@ -46,7 +47,8 @@ class DataManager:
         return train_x, train_y, valid_x, valid_y
 
     @staticmethod
-    def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: int = 1) -> (np.ndarray, np.ndarray):
+    def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: int = 1) -> (
+    np.ndarray, np.ndarray):
         """
         generate new dataset based on the provided weight
         :param x:

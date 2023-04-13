@@ -3,7 +3,7 @@ import numpy as np
 
 def write(x: np.ndarray, y: np.ndarray, base: int, fold: int, path: str = 'experiments'):
     """
-    write the predicted
+    write the predicted results to file
     :param x:
     :param y:
     :param base:

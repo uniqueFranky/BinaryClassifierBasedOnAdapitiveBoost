@@ -47,7 +47,7 @@ class DataManager:
         return train_x, train_y, valid_x, valid_y
 
     @staticmethod
-    def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: int = 1) -> (
+    def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: float = 1) -> (
     np.ndarray, np.ndarray):
         """
         generate new dataset based on the provided weight
@@ -64,7 +64,7 @@ class DataManager:
 
         generated_x = []
         generated_y = []
-        num_samples = multiple * x.shape[0]
+        num_samples = int(multiple * x.shape[0])
 
         # generate new dataset using the weight as distribution
         for _ in range(num_samples):

@@ -3,9 +3,12 @@ from logisticRegression import LogisticRegressionClassifier
 from adaBoost import AdaBooster
 
 if __name__ == '__main__':
-    booster = AdaBooster(LogisticRegressionClassifier, {
-        'lr': 0.001,
-        'max_iter': 100
+    booster = AdaBooster(LogisticRegressionClassifier, learner_config={
+        'lr': 0.0005,
+        'max_iter': 100,
+        'sample_multiple': 1,
+        'use_distributed_dataset': True,
+        'write_to_file': False
     }, feature_path='data.csv', label_path='targets.csv')
 
     for base in [1, 5, 10, 100]:

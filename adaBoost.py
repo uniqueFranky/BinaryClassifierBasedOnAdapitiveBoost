@@ -37,10 +37,15 @@ class AdaBooster:
         for t in range(num_base):
             print(f'training the %d-th base...' % (t + 1))
             assert sum(self.distribution) <= 1 + 1e-6
-            distributed_x, distributed_y = DataManager.generate_distributed_data(train_x, train_y, self.distribution,
-                                                                                 multiple=1)
+            if self.learner_config['use_distributed_dataset']:
+                distributed_x, distributed_y = DataManager.generate_distributed_data(train_x, train_y,
+                                                                                     self.distribution,
+                                                                                     multiple=self.learner_config[
+                                                                                         'sample_multiple'])
+            else:
+                distributed_x, distributed_y = train_x, train_y
             learner_t = self.learner_type(self.learner_config)
-            learner_t.fit(distributed_x[:, 1:], distributed_y)
+            learner_t.fit(distributed_x[:, 1:], distributed_y, self.distribution)
             pred = learner_t.predict(train_x[:, 1:])
             err = 0.0
             for i in range(train_x.shape[0]):
@@ -76,5 +81,6 @@ class AdaBooster:
                 acc += 1
         acc /= valid_y.shape[0]
         print(f'fold = %d, acc rate = %f' % (fold_id, acc))
-        fileWriter.write(valid_x, pred, num_base, fold_id)
+        if self.learner_config['write_to_file']:
+            fileWriter.write(valid_x, pred, num_base, fold_id)
         return acc

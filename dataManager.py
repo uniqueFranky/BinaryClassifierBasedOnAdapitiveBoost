@@ -28,7 +28,7 @@ class DataManager:
             if self.y[i] == 0:
                 self.y[i] = -1
 
-    def get_folded_data(self, fold_id: int) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+    def get_folded_data(self, fold_id: int) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, list, int):
         """
         load data according to 10-Fold Cross Validation Technique
         :param fold_id:
@@ -44,8 +44,12 @@ class DataManager:
         train_y = self.y[0: (fold_id - 1) * num_tuples_per_fold]
         train_x = np.append(train_x, self.x[fold_id * num_tuples_per_fold: self.x.shape[0], :], axis=0)
         train_y = np.append(train_y, self.y[fold_id * num_tuples_per_fold: self.y.shape[0]], axis=0)
-
-        return train_x, train_y, valid_x, valid_y
+        mapped_index = []
+        for i in range(0, (fold_id - 1) * num_tuples_per_fold):
+            mapped_index.append(i)
+        for i in range(fold_id * num_tuples_per_fold, self.x.shape[0]):
+            mapped_index.append(i)
+        return train_x, train_y, valid_x, valid_y, mapped_index, self.x.shape[0]
 
     @staticmethod
     def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: float = 1) -> (

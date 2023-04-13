@@ -23,15 +23,11 @@ class AdaBooster:
         self.distribution: [float] = []
 
     def train(self, fold_id: int, num_base: int):
-        train_x, train_y, valid_x, _ = self.data_manager.get_folded_data(fold_id)
+        train_x, train_y, _, _, mapped_index, num_samples = self.data_manager.get_folded_data(fold_id)
         self.learner_config['num_features'] = train_x.shape[1] - 1
-        self.distribution = [0] * (train_x.shape[0] + valid_x.shape[0])
-        is_in_train = [False] * (train_x.shape[0] + valid_x.shape[0])
-        for row in train_x:
-            is_in_train[int(row[0])] = True
-        for i in range(train_x.shape[0] + valid_x.shape[0]):
-            if is_in_train[i]:
-                self.distribution[i] = 1 / train_x.shape[0]
+        self.distribution = [0] * num_samples
+        for i in mapped_index:
+            self.distribution[i] = 1 / train_x.shape[0]
         self.learner_sequence = []
         self.alpha = []
         for t in range(num_base):
@@ -44,8 +40,11 @@ class AdaBooster:
                                                                                          'sample_multiple'])
             else:
                 distributed_x, distributed_y = train_x, train_y
+            inner_distribution = []
+            for i in mapped_index:
+                inner_distribution.append(self.distribution[i])
             learner_t = self.learner_type(self.learner_config)
-            learner_t.fit(distributed_x[:, 1:], distributed_y, self.distribution)
+            learner_t.fit(distributed_x[:, 1:], distributed_y, inner_distribution)
             pred = learner_t.predict(train_x[:, 1:])
             err = 0.0
             for i in range(train_x.shape[0]):
@@ -62,11 +61,11 @@ class AdaBooster:
             tot_distribution = 0.0
             for d in self.distribution:
                 tot_distribution += d
-            for i in range(train_x.shape[0] + valid_x.shape[0]):
+            for i in range(num_samples):
                 self.distribution[i] /= tot_distribution
 
     def valid(self, fold_id: int, num_base: int):
-        _, _, valid_x, valid_y = self.data_manager.get_folded_data(fold_id)
+        _, _, valid_x, valid_y, _, _ = self.data_manager.get_folded_data(fold_id)
         pred = np.array([0] * valid_x.shape[0], dtype=float)
         for i in range(len(self.learner_sequence)):
             pred += self.learner_sequence[i].predict(valid_x[:, 1:]) * self.alpha[i]

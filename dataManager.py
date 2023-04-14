@@ -82,7 +82,6 @@ class DataManager:
 
     @staticmethod
     def binary_search(lst: list, obj: float):
-        logger = Logger('dataManager_binarySearch')
         l = 0
         r = len(lst) - 1
         while l < r:
@@ -91,5 +90,4 @@ class DataManager:
                 l = mid + 1
             else:
                 r = mid
-        logger.log(f'obj = %f, found = %f' % (obj, lst[l]))
         return l

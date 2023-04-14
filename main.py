@@ -3,6 +3,7 @@ from logisticRegression import LogisticRegressionClassifier
 from decisionStump import DecisionStumpClassifier
 from adaBoost import AdaBooster
 from logger import Logger
+
 decision_stump_config = {
     'use_distributed_dataset': False,
     'sample_multiple': 1.0,
@@ -13,7 +14,7 @@ decision_stump_config = {
 logistic_regression_config = {
     'lr': 0.00005,
     'max_iter': 25,
-    'sample_multiple': 1.0,
+    'sample_multiple': 2.0,
     'use_distributed_dataset': True,
     'write_to_file': True,
     'standardize': True
@@ -46,15 +47,14 @@ def enumerate_super_parameters_logistic_regression():
 
 
 if __name__ == '__main__':
-    enumerate_super_parameters_logistic_regression()
-    # booster = AdaBooster(DecisionStumpClassifier, decision_stump_config, feature_path='data.csv',
-    #                      label_path='targets.csv')
-    # for base in [1, 5, 10, 100]:
-    #     print(f'base = %d' % base)
-    #     acc = 0
-    #     for fold in range(1, 11):
-    #         booster.train(fold, base)
-    #         acc += booster.valid(fold, base)
-    #     print(f'tot acc = %f' % (acc / 10))
+    # enumerate_super_parameters_logistic_regression()
+    booster = AdaBooster(DecisionStumpClassifier, decision_stump_config, feature_path='data.csv',
+                         label_path='targets.csv')
+    for base in [1, 5, 10, 100]:
+        accuracy = 0
+        for fold in range(1, 11):
+            booster.train(fold, base)
+            accuracy += booster.valid(fold, base)
+        print(f'base = %d, total accuracy = %f' % (base, accuracy / 10))
 
 

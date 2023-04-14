@@ -31,13 +31,12 @@ class AdaBooster:
         self.learner_sequence = []
         self.alpha = []
 
-        inner_distribution = []
-        for i in mapped_index:
-            inner_distribution.append(self.distribution[i])
-
         for t in range(num_base):
             print(f'training the %d-th base learner of the %d-th fold...' % (t + 1, fold_id))
             assert sum(self.distribution) <= 1 + 1e-6
+            inner_distribution = []
+            for i in mapped_index:
+                inner_distribution.append(self.distribution[i])
             if self.learner_config['use_distributed_dataset']:
                 distributed_x, distributed_y = DataManager.generate_distributed_data(train_x, train_y,
                                                                                      inner_distribution,
@@ -57,9 +56,9 @@ class AdaBooster:
 
             for i in range(train_x.shape[0]):
                 if pred[i] == train_y[i]:
-                    self.distribution[i] *= math.exp(-self.alpha[t])
+                    self.distribution[int(train_x[i][0])] *= math.exp(-self.alpha[t])
                 else:
-                    self.distribution[i] *= math.exp(self.alpha[t])
+                    self.distribution[int(train_x[i][0])] *= math.exp(self.alpha[t])
             tot_distribution = 0.0
             for d in self.distribution:
                 tot_distribution += d

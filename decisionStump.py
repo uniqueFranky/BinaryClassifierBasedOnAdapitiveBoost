@@ -72,33 +72,42 @@ class DecisionManager:
         self.num_features = num_features
         self.distribution = distribution
         self.decision_index = decision_index
-
         points = []
         negatives = []
         positives = []
-        for (i, feature) in enumerate(x):
-            points.append(feature[decision_index])
+        for i in range(x.shape[0]):
+            points.append(x[i][decision_index])
             if y[i] == 1:
-                positives.append(DecisionPoint(key=feature[decision_index], value=i))
+                positives.append(DecisionPoint(key=x[i][decision_index], value=i))
             else:
-                negatives.append(DecisionPoint(key=feature[decision_index], value=i))
+                negatives.append(DecisionPoint(key=x[i][decision_index], value=i))
 
         points = sorted(set(points))
-        self.positives = sorted(positives, key=lambda element: element.key)
-        self.negatives = sorted(negatives, key=lambda element: element.key)
-        len_positives = len(positives)
-        len_negatives = len(negatives)
+        positives = sorted(positives, key=lambda element: element.key)
+        negatives = sorted(negatives, key=lambda element: element.key)
 
-        self.positive_distribution_prefix_sum = [0] * len_positives
-        self.negative_distribution_prefix_sum = [0] * len_negatives
-        self.positive_distribution_prefix_sum[0] = distribution[positives[0].value]
-        self.negative_distribution_prefix_sum[0] = distribution[negatives[0].value]
-        for i in range(1, len_positives):
-            self.positive_distribution_prefix_sum[i] = self.positive_distribution_prefix_sum[i - 1] + distribution[
-                positives[i].value]
-        for i in range(1, len_negatives):
-            self.negative_distribution_prefix_sum[i] = self.negative_distribution_prefix_sum[i - 1] + distribution[
-                negatives[i].value]
+        self.positives = [positives[0]]
+        self.positive_distribution_prefix_sum = [distribution[positives[0].value]]
+        for i in range(1, len(positives)):
+            if positives[i].key == self.positives[-1].key:
+                self.positive_distribution_prefix_sum[-1] += distribution[positives[i].value]
+            else:
+                self.positives.append(positives[i])
+                self.positive_distribution_prefix_sum.append(distribution[positives[i].value])
+                self.positive_distribution_prefix_sum[-1] += self.positive_distribution_prefix_sum[-2]
+        assert len(self.positives) == len(self.positive_distribution_prefix_sum)
+
+        self.negatives = [negatives[0]]
+        self.negative_distribution_prefix_sum = [distribution[negatives[0].value]]
+        for i in range(1, len(negatives)):
+            if negatives[i].key == self.negatives[-1].key:
+                self.negative_distribution_prefix_sum[-1] += distribution[negatives[i].value]
+            else:
+                self.negatives.append(negatives[i])
+                self.negative_distribution_prefix_sum.append(distribution[negatives[i].value])
+                self.negative_distribution_prefix_sum[-1] += self.negative_distribution_prefix_sum[-2]
+        assert len(self.negatives) == len(self.negative_distribution_prefix_sum)
+
         self.candidate_points = []
         len_points = len(points)
         for i in range(len_points - 1):
@@ -109,35 +118,22 @@ class DecisionManager:
 
     def calculate_distribution_prefix_sum(self, positive: bool = True, bias: float = 0) -> float:
         if positive:
-            idx = DecisionManager.binary_search_less(self.positives, obj=bias)
+            idx = DecisionManager.binary_search(self.positives, obj=bias)
             return self.positive_distribution_prefix_sum[idx]
         else:
-            idx = DecisionManager.binary_search_less(self.negatives, obj=bias)
+            idx = DecisionManager.binary_search(self.negatives, obj=bias)
             return self.negative_distribution_prefix_sum[idx]
-
-    @staticmethod
-    def binary_search_less(lst: list, obj: float = 0) -> int:
-        len_lst = len(lst)
-        l = 0
-        r = len_lst - 1
-        while l < r:
-            mid = int((l + r + 1) / 2)
-            if lst[mid].key <= obj:
-                l = mid
-            else:
-                r = mid - 1
-        return l
 
     def calculate_distribution_suffix_sum(self, positive: bool = True, bias: float = 0) -> float:
         if positive:
-            idx = DecisionManager.binary_search_greater(self.positives, obj=bias)
+            idx = DecisionManager.binary_search(self.positives, obj=bias)
             return self.positive_distribution_prefix_sum[-1] - self.positive_distribution_prefix_sum[idx]
         else:
-            idx = DecisionManager.binary_search_greater(self.negatives, obj=bias)
+            idx = DecisionManager.binary_search(self.negatives, obj=bias)
             return self.negative_distribution_prefix_sum[-1] - self.negative_distribution_prefix_sum[idx]
 
     @staticmethod
-    def binary_search_greater(lst: list, obj: float = 0) -> int:
+    def binary_search(lst: list, obj: float = 0) -> int:
         len_lst = len(lst)
         l = 0
         r = len_lst - 1
@@ -147,4 +143,6 @@ class DecisionManager:
                 l = mid
             else:
                 r = mid - 1
+        # logger = Logger('decision_manager_binary_search')
+        # logger.log(f'obj = %f, found = %f' % (obj, lst[l].key))
         return l

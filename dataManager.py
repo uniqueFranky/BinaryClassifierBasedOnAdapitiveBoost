@@ -1,6 +1,6 @@
 import math
 import random
-
+from logger import Logger
 import numpy as np
 
 
@@ -64,7 +64,8 @@ class DataManager:
         """
         assert x.shape[0] == y.shape[0]
         prefix_sum = distribution.copy()
-        for i in range(1, len(prefix_sum)):
+        len_prefix_sum = len(prefix_sum)
+        for i in range(1, len_prefix_sum):
             prefix_sum[i] += prefix_sum[i - 1]
 
         generated_x = []
@@ -74,11 +75,21 @@ class DataManager:
         # generate new dataset using the weight as distribution
         for _ in range(num_samples):
             rand = random.random()
-            for i in range(x.shape[0]):
-                # if the random value falls in such an interval, the corresponding tuple should appear in the dataset
-                if rand <= prefix_sum[i]:
-                    generated_x.append(x[i].tolist())
-                    generated_y.append(y[i])
-
-                    break
+            selected = DataManager.binary_search(prefix_sum, rand)
+            generated_x.append(x[selected].tolist())
+            generated_y.append(y[selected])
         return np.array(generated_x), np.array(generated_y)
+
+    @staticmethod
+    def binary_search(lst: list, obj: float):
+        logger = Logger('dataManager_binarySearch')
+        l = 0
+        r = len(lst) - 1
+        while l < r:
+            mid = int((l + r) / 2)
+            if lst[mid] < obj:
+                l = mid + 1
+            else:
+                r = mid
+        logger.log(f'obj = %f, found = %f' % (obj, lst[l]))
+        return l

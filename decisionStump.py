@@ -1,9 +1,5 @@
-import math
 import numpy as np
-
-import logger
 from baseLearner import BaseLearner
-from logger import Logger
 
 
 class DecisionStumpClassifier(BaseLearner):
@@ -14,7 +10,7 @@ class DecisionStumpClassifier(BaseLearner):
         self.decision_factor = 0.0
         self.decision_bias = 0.0
         self.best_accuracy = 0
-        self.logger = Logger('decisionStump')
+        # self.logger = Logger('decisionStump')
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         assert self.decision_index >= 0
@@ -51,8 +47,8 @@ class DecisionStumpClassifier(BaseLearner):
                         self.decision_index = decision_index
                         self.decision_bias = decision_bias
                         self.decision_factor = decision_factor
-        self.logger.log(f'best accuracy = %f, decision_index = %d, decision_bias = %f, decision_factor = %f' % (
-            self.best_accuracy, self.decision_index, self.decision_bias, self.decision_factor))
+        # self.logger.log(f'best accuracy = %f, decision_index = %d, decision_bias = %f, decision_factor = %f' % (
+        #     self.best_accuracy, self.decision_index, self.decision_bias, self.decision_factor))
 
 
 class DecisionPoint:

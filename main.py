@@ -1,4 +1,3 @@
-import dataManager
 from logisticRegression import LogisticRegressionClassifier
 from decisionStump import DecisionStumpClassifier
 from adaBoost import AdaBooster

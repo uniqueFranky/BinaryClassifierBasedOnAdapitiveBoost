@@ -1,6 +1,5 @@
 import math
 import random
-from logger import Logger
 import numpy as np
 
 

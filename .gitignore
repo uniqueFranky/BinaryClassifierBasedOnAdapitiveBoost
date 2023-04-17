@@ -3,3 +3,4 @@ experiments/*
 .idea/*
 *.log
 logistic_super_parameters.csv
+__pycache__/*

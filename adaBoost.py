@@ -16,7 +16,7 @@ class AdaBooster:
         :param label_path: the file path to load labels
         """
         self.data_manager = DataManager(feature_path, label_path, standardize=learner_config['standardize'])  # 获取、管理数据
-        self.learner_type = learner_type  # 基学习器的类型： LogisticRegressionClassifier 或 DecisionTreeStumpClassifier
+        self.learner_type = learner_type  # 基学习器的类型： LogisticRegressionClassifier 或 DecisionStumpClassifier
         self.learner_config = learner_config  # 用于初始化基学习器
         self.learner_sequence = []  # 用于线性叠加的基学习器们
         self.alpha: [float] = []  # 基学习器线性叠加时的权重

@@ -45,8 +45,7 @@ def enumerate_super_parameters_logistic_regression():
 
 if __name__ == '__main__':
     booster = None
-    assert len(sys.argv) == 2 and (sys.argv[1] == '0' or sys.argv[1] == '1')
-    if sys.argv[1] == '0':
+    if len(sys.argv) == 2 and sys.argv[1] == '0':
         print('running Logistic Regression!!')
         booster = AdaBooster(LogisticRegressionClassifier, logistic_regression_config, feature_path='data.csv',
                              label_path='targets.csv')

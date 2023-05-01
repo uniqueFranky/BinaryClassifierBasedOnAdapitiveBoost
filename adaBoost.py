@@ -118,7 +118,7 @@ class AdaBooster:
             if pred[i] == valid_y[i]:
                 acc += 1
         acc /= valid_y.shape[0]
-        print(f'fold = %d, acc rate = %f' % (fold_id, acc))
+        # print(f'fold = %d, acc rate = %f' % (fold_id, acc))
 
         if self.learner_config['write_to_file']:  # 将预测结果写入experiments/
             fileWriter.write(valid_x, pred, num_base, fold_id)

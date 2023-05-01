@@ -7,6 +7,7 @@ def sigmoid(x: float) -> float:
     return 1 / (1 + math.exp(-x))
 
 
+# 对数几率回归，继承自BaseLearner
 class LogisticRegressionClassifier(BaseLearner):
     def __init__(self, config):
         super().__init__(config)
@@ -20,7 +21,7 @@ class LogisticRegressionClassifier(BaseLearner):
             grad = np.zeros(self.num_features, dtype=float)
             for i, feature in enumerate(x):
                 # print(y[i])
-                grad += (sigmoid(y[i] * np.dot(self.w, feature)) - 1) * y[i] * feature
+                grad += (sigmoid(y[i] * np.dot(self.w, feature)) - 1) * y[i] * feature * distribution[i]
             self.w -= self.lr * grad
 
     def predict(self, x: np.ndarray) -> np.ndarray:

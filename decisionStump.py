@@ -131,14 +131,12 @@ class DecisionManager:
     @staticmethod
     def binary_search(lst: list, obj: float = 0) -> int:
         len_lst = len(lst)
-        l = 0
-        r = len_lst - 1
-        while l < r:
-            mid = int((l + r + 1) / 2)
+        lef = 0
+        rig = len_lst - 1
+        while lef < rig:
+            mid = (lef + rig + 1) // 2
             if lst[mid].key < obj:
-                l = mid
+                lef = mid
             else:
-                r = mid - 1
-        # logger = Logger('decision_manager_binary_search')
-        # logger.log(f'obj = %f, found = %f' % (obj, lst[l].key))
-        return l
+                rig = mid - 1
+        return lef

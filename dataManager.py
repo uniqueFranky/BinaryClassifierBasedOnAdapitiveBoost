@@ -27,6 +27,19 @@ class DataManager:
             if self.y[i] == 0:
                 self.y[i] = -1
 
+        random_idx = [i for i in range(self.x.shape[0])]
+        random.shuffle(random_idx)
+        random_x = []
+        random_y = []
+        for i in range(self.x.shape[0]):
+            random_x.append(self.x[random_idx[i]].tolist())
+            random_y.append(self.y[random_idx[i]].tolist())
+        random_x = np.array(random_x, dtype=int)
+        random_y = np.array(random_y, dtype=int)
+        assert random_x.shape == self.x.shape and random_y.shape == self.y.shape
+        self.x = random_x
+        self.y = random_y
+
     def get_folded_data(self, fold_id: int) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, list, int):
         """
         load data according to 10-Fold Cross Validation Technique
@@ -44,10 +57,8 @@ class DataManager:
         train_x = np.append(train_x, self.x[fold_id * num_tuples_per_fold: self.x.shape[0], :], axis=0)
         train_y = np.append(train_y, self.y[fold_id * num_tuples_per_fold: self.y.shape[0]], axis=0)
         mapped_index = []
-        for i in range(0, (fold_id - 1) * num_tuples_per_fold):
-            mapped_index.append(i)
-        for i in range(fold_id * num_tuples_per_fold, self.x.shape[0]):
-            mapped_index.append(i)
+        for i in range(train_x.shape[0]):
+            mapped_index.append(int(train_x[i][0]))
         return train_x, train_y, valid_x, valid_y, mapped_index, self.x.shape[0]
 
     @staticmethod

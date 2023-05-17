@@ -1,3 +1,5 @@
+import time
+
 from logisticRegression import LogisticRegressionClassifier
 from decisionStump import DecisionStumpClassifier
 from adaBoost import AdaBooster
@@ -8,18 +10,19 @@ decision_stump_config = {
     'use_distributed_dataset': False,
     'sample_multiple': None,
     'write_to_file': True,
-    'standardize': True
+    'standardize': True,
+    'use_random': True
 }
 
 logistic_regression_config = {
-    'lr': 0.00005,
-    'max_iter': 25,
+    'lr': 0.1,
+    'max_iter': 5,
     'use_distributed_dataset': False,
     'sample_multiple': None,
     'write_to_file': True,
-    'standardize': True
+    'standardize': True,
+    'use_random': False
 }
-
 
 def enumerate_super_parameters_logistic_regression():
     logistic_regression_config['write_to_file'] = False
@@ -44,6 +47,7 @@ def enumerate_super_parameters_logistic_regression():
 
 
 if __name__ == '__main__':
+    time_start = time.time()
     booster = None
     if len(sys.argv) == 2 and sys.argv[1] == '0':
         print('running Logistic Regression!!')
@@ -60,5 +64,6 @@ if __name__ == '__main__':
             booster.train(fold, base)
             accuracy += booster.valid(fold, base)
         print(f'base = %d, total accuracy = %f' % (base, accuracy / 10))
-
+    time_end = time.time()
+    print('用时', time_end - time_start, 's')
 

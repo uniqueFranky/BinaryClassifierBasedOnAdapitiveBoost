@@ -20,7 +20,6 @@ class LogisticRegressionClassifier(BaseLearner):
         for _ in range(self.max_iter):
             grad = np.zeros(self.num_features, dtype=float)
             for i, feature in enumerate(x):
-                # print(y[i])
                 grad += (sigmoid(y[i] * np.dot(self.w, feature)) - 1) * y[i] * feature * distribution[i]
             self.w -= self.lr * grad
 

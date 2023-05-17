@@ -15,7 +15,7 @@ class AdaBooster:
         :param feature_path: the file path to load features
         :param label_path: the file path to load labels
         """
-        self.data_manager = DataManager(feature_path, label_path, standardize=learner_config['standardize'])  # 获取、管理数据
+        self.data_manager = DataManager(feature_path, label_path, standardize=learner_config['standardize'], use_random=learner_config['use_random'])  # 获取、管理数据
         self.learner_type = learner_type  # 基学习器的类型： LogisticRegressionClassifier 或 DecisionStumpClassifier
         self.learner_config = learner_config  # 用于初始化基学习器
         self.learner_sequence = []  # 用于线性叠加的基学习器们
@@ -46,7 +46,6 @@ class AdaBooster:
 
         # 训练模型
         for t in range(num_base):
-            print(f'training the %d-th base learner of the %d-th fold...' % (t + 1, fold_id))
             assert sum(self.distribution) <= 1 + 1e-6  # 考虑浮点误差，样本的权重之和应为1
 
             # 由于基分类器在训练时，只拿到了训练集的数据，而训练集的下标在distribution数组里的分布并不是连续的
@@ -65,7 +64,7 @@ class AdaBooster:
 
             # 以权重D(t)训练h_t，即以distribution为权重训练learner_t
             # 若已将训练集按照样本权重进行随机重构，则传入的权重应为均匀分布，否则传入distribution
-            learner_t = self.learner_type(self.learner_config)
+            learner_t = self.learner_type(self.learner_config)  # 根据指定的基分类器的类型和config来初始化基分类器
             learner_t.fit(distributed_x[:, 1:], distributed_y,
                           multiplied_uniform if self.learner_config['use_distributed_dataset'] else inner_distribution)
             pred = learner_t.predict(train_x[:, 1:])
@@ -75,7 +74,9 @@ class AdaBooster:
             for i in range(train_x.shape[0]):
                 if pred[i] != train_y[i]:
                     err += self.distribution[int(train_x[i][0])]
-
+            if err > 0.5:
+                # print("t =", t + 1, "err =", err, " end!")
+                return
             self.alpha.append(math.log((1 - err) / err) / 2)  # 根据加权错误率计算alpha
             self.learner_sequence.append(learner_t)  # 将新训练出的基分类器加入分类器序列
 

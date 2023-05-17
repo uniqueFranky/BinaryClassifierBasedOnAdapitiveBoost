@@ -32,12 +32,12 @@ class DecisionStumpClassifier(BaseLearner):
             for decision_bias in candidate_points:
                 for decision_factor in [-1, 1]:
                     accuracy = 0
-                    if decision_factor == -1:  # the samples with key < bias is predicted to be positive
+                    if decision_factor == -1:  # key < bias 的样本被预测为正类
                         accuracy += decision_manager.calculate_distribution_prefix_sum(positive=True,
                                                                                        bias=decision_bias)
                         accuracy += decision_manager.calculate_distribution_suffix_sum(positive=False,
                                                                                        bias=decision_bias)
-                    else:  # the samples with key < bias is predicted to be negative
+                    else:  # key < bias 的样本被预测为负类
                         accuracy += decision_manager.calculate_distribution_prefix_sum(positive=False,
                                                                                        bias=decision_bias)
                         accuracy += decision_manager.calculate_distribution_suffix_sum(positive=True,
@@ -82,12 +82,12 @@ class DecisionManager:
         positives = sorted(positives, key=lambda element: element.key)
         negatives = sorted(negatives, key=lambda element: element.key)
 
-        self.positives = [positives[0]]
-        self.positive_distribution_prefix_sum = [distribution[positives[0].value]]
+        self.positives = [positives[0]]  # 经过排序后的正类样本
+        self.positive_distribution_prefix_sum = [distribution[positives[0].value]]  # 正类权重前缀和
         for i in range(1, len(positives)):
-            if positives[i].key == self.positives[-1].key:
+            if positives[i].key == self.positives[-1].key:  # 和前一个样本的值重复，不需要新建一个位置
                 self.positive_distribution_prefix_sum[-1] += distribution[positives[i].value]
-            else:
+            else:  # 和前一个样本的值不重复
                 self.positives.append(positives[i])
                 self.positive_distribution_prefix_sum.append(distribution[positives[i].value])
                 self.positive_distribution_prefix_sum[-1] += self.positive_distribution_prefix_sum[-2]

@@ -4,7 +4,7 @@ import numpy as np
 
 
 class DataManager:
-    def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv', standardize: bool = True):
+    def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv', standardize: bool = True, use_random: bool = False):
         self.x = np.genfromtxt(data_path, delimiter=',')
         self.y = np.genfromtxt(targets_path, delimiter=',', dtype=float)
         # standardize
@@ -27,18 +27,19 @@ class DataManager:
             if self.y[i] == 0:
                 self.y[i] = -1
 
-        random_idx = [i for i in range(self.x.shape[0])]
-        random.shuffle(random_idx)
-        random_x = []
-        random_y = []
-        for i in range(self.x.shape[0]):
-            random_x.append(self.x[random_idx[i]].tolist())
-            random_y.append(self.y[random_idx[i]].tolist())
-        random_x = np.array(random_x, dtype=int)
-        random_y = np.array(random_y, dtype=int)
-        assert random_x.shape == self.x.shape and random_y.shape == self.y.shape
-        self.x = random_x
-        self.y = random_y
+        if use_random:
+            random_idx = [i for i in range(self.x.shape[0])]
+            random.Random(998244353).shuffle(random_idx)
+            random_x = []
+            random_y = []
+            for i in range(self.x.shape[0]):
+                random_x.append(self.x[random_idx[i]].tolist())
+                random_y.append(self.y[random_idx[i]].tolist())
+            random_x = np.array(random_x, dtype=int)
+            random_y = np.array(random_y, dtype=int)
+            assert random_x.shape == self.x.shape and random_y.shape == self.y.shape
+            self.x = random_x
+            self.y = random_y
 
     def get_folded_data(self, fold_id: int) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, list, int):
         """

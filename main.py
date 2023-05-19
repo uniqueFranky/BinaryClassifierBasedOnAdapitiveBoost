@@ -3,7 +3,6 @@ import time
 from logisticRegression import LogisticRegressionClassifier
 from decisionStump import DecisionStumpClassifier
 from adaBoost import AdaBooster
-from logger import Logger
 import sys
 
 decision_stump_config = {
@@ -24,40 +23,22 @@ logistic_regression_config = {
     'use_random': False
 }
 
-def enumerate_super_parameters_logistic_regression():
-    logistic_regression_config['write_to_file'] = False
-    with open('logistic_super_parameters.csv', 'a') as f:
-        logger = Logger('logisticSuperParameters')
-        for lr in [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001, 0.00005, 0.00001]:
-            for max_iter in [5, 10, 20, 50, 100]:
-                logistic_regression_config['lr'] = lr
-                logistic_regression_config['max_iter'] = max_iter
-                booster = AdaBooster(LogisticRegressionClassifier, logistic_regression_config, feature_path='data.csv',
-                                     label_path='targets.csv')
-
-                for base in [1, 5, 10, 100]:
-                    acc = 0
-                    for fold in range(1, 11):
-                        booster.train(fold, base)
-                        acc += booster.valid(fold, base)
-                    acc /= 10
-                    logger.log('lr = %f, max_iter = %d, base = %d, accuracy rate = %f' % (lr, max_iter, base, acc))
-                    f.write(f'%f, %d, %d, %f\n' % (lr, max_iter, base, acc))
-                logger.log('\n')
-
-
+# python main.py 1    运行决策树桩
+# python main.py 0    运行对数几率回归
 if __name__ == '__main__':
     time_start = time.time()
     booster = None
+    # 对数几率回归
     if len(sys.argv) == 2 and sys.argv[1] == '0':
-        print('running Logistic Regression!!')
+        print('正在训练对数几率回归……')
         booster = AdaBooster(LogisticRegressionClassifier, logistic_regression_config, feature_path='data.csv',
-                             label_path='targets.csv')
+                             label_path='targets.csv', test_path='test.csv')
+    # 决策树桩
     else:
-        print('running Decision Stump!!')
+        print('正在训练决策树桩……')
         booster = AdaBooster(DecisionStumpClassifier, decision_stump_config, feature_path='data.csv',
-                             label_path='targets.csv')
-
+                             label_path='targets.csv', test_path='test.csv')
+    # 十折交叉验证
     for base in [1, 5, 10, 100]:
         accuracy = 0
         for fold in range(1, 11):
@@ -65,5 +46,14 @@ if __name__ == '__main__':
             accuracy += booster.valid(fold, base)
         print(f'base = %d, total accuracy = %f' % (base, accuracy / 10))
     time_end = time.time()
-    print('用时', time_end - time_start, 's')
+    print('十折交叉验证完成，用时', time_end - time_start, 's')
+    print('十折交叉验证结果已写入experiments目录')
 
+    # 测试
+    print('\n开始测试……')
+    time_start = time.time()
+    booster.train(None, 1 if sys.argv[1] == '0' else 100)  # 决策树桩训练100个基分类器，对数几率回归训练1个基分类器
+    booster.predict()  # 对test.csv进行预测并写入pred_y.csv
+    time_end = time.time()
+    print('测试完成，用时', time_end - time_start, 's')
+    print('预测结果已写入pred_y.csv')

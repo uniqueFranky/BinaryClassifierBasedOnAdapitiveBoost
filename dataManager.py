@@ -4,23 +4,26 @@ import numpy as np
 
 
 class DataManager:
-    def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv', standardize: bool = True, use_random: bool = False):
-        self.x = np.genfromtxt(data_path, delimiter=',')
+    def __init__(self, data_path: str = 'data.csv', targets_path: str = 'targets.csv', test_path: str = 'test.csv', standardize: bool = True, use_random: bool = False):
+        self.x = np.genfromtxt(data_path, delimiter=',', dtype=float)
         self.y = np.genfromtxt(targets_path, delimiter=',', dtype=float)
+        self.test = np.genfromtxt(test_path, delimiter=',', dtype=float)
         # standardize
         if standardize:
-            for i in range(self.x.shape[1]):
-                avg = sum(self.x[:, i]) / self.x.shape[0]
-                var = 0
-                for j in range(self.x.shape[0]):
-                    var += (self.x[j][i] - avg) ** 2
-                var /= self.x.shape[0]
-                var = math.sqrt(var)
-                self.x[:, i] = (self.x[:, i] - avg) / var
+            mean = self.x.mean(axis=0)
+            std = self.x.std(axis=0)
+            self.x = (self.x - mean) / std
+
+            mean = self.test.mean(axis=0)
+            std = self.test.std(axis=0)
+            self.test = (self.test - mean) / std
 
         # insert indices of data
         idx = np.array([i for i in range(self.x.shape[0])], dtype=int)
         self.x = np.insert(self.x, 0, idx, axis=1)
+
+        idx = np.array([i for i in range(self.test.shape[0])], dtype=int)
+        self.test = np.insert(self.test, 0, idx, axis=1)
 
         # replace 0 with -1 in labels
         for i in range(self.y.shape[0]):
@@ -47,7 +50,8 @@ class DataManager:
         :param fold_id:
         :return: train_x, train_y, validation_x, validation_y
         """
-
+        if fold_id is None:
+            return self.x, self.y, self.test, None, self.x[:, 0].astype(int), self.x.shape[0]
         num_tuples_per_fold = int(self.x.shape[0] / 10)
 
         valid_x = self.x[(fold_id - 1) * num_tuples_per_fold: fold_id * num_tuples_per_fold, :]
@@ -57,10 +61,7 @@ class DataManager:
         train_y = self.y[0: (fold_id - 1) * num_tuples_per_fold]
         train_x = np.append(train_x, self.x[fold_id * num_tuples_per_fold: self.x.shape[0], :], axis=0)
         train_y = np.append(train_y, self.y[fold_id * num_tuples_per_fold: self.y.shape[0]], axis=0)
-        mapped_index = []
-        for i in range(train_x.shape[0]):
-            mapped_index.append(int(train_x[i][0]))
-        return train_x, train_y, valid_x, valid_y, mapped_index, self.x.shape[0]
+        return train_x, train_y, valid_x, valid_y, train_x[:, 0].astype(int), self.x.shape[0]
 
     @staticmethod
     def generate_distributed_data(x: np.ndarray, y: np.ndarray, distribution: list, multiple: float = 1) -> (

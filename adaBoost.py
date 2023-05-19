@@ -8,21 +8,22 @@ from dataManager import DataManager
 
 
 class AdaBooster:
-    def __init__(self, learner_type: type(BaseLearner), learner_config: dict, feature_path: str, label_path: str):
+    def __init__(self, learner_type: type(BaseLearner), learner_config: dict, feature_path: str, label_path: str, test_path: str):
         """
         :param learner_type: the type of base learner boosted by the AdaBooster
         :param learner_config: the configuration to init the base learners
         :param feature_path: the file path to load features
         :param label_path: the file path to load labels
         """
-        self.data_manager = DataManager(feature_path, label_path, standardize=learner_config['standardize'], use_random=learner_config['use_random'])  # 获取、管理数据
+        self.data_manager = DataManager(feature_path, label_path, test_path,
+                                        standardize=learner_config['standardize'], use_random=learner_config['use_random'])  # 获取、管理数据
         self.learner_type = learner_type  # 基学习器的类型： LogisticRegressionClassifier 或 DecisionStumpClassifier
         self.learner_config = learner_config  # 用于初始化基学习器
         self.learner_sequence = []  # 用于线性叠加的基学习器们
         self.alpha: [float] = []  # 基学习器线性叠加时的权重
         self.distribution: [float] = []  # 数据中每个样本的权重，即讲义中的D_t (i)，由于其构成一个分布，故起名distribution
 
-    def train(self, fold_id: int, num_base: int):
+    def train(self, fold_id, num_base):
         """
         对第fold_id折的训练集，训练num_base层基分类器
         :param fold_id:
@@ -124,3 +125,18 @@ class AdaBooster:
         if self.learner_config['write_to_file']:  # 将预测结果写入experiments/
             fileWriter.write(valid_x, pred, num_base, fold_id)
         return acc
+
+    def predict(self):
+        _, _, test_x, _, _, _ = self.data_manager.get_folded_data(None)  # 仅获取验证集数据
+
+        # 对验证集样本进行预测
+        pred = np.array([0] * test_x.shape[0], dtype=float)
+        for i in range(len(self.learner_sequence)):  # 各个基分类器以alpha[i]为权重线性叠加
+            pred += self.learner_sequence[i].predict(test_x[:, 1:]) * self.alpha[i]
+        for i in range(len(pred)):  # 计算sign(h_t(x))
+            if pred[i] > 0:
+                pred[i] = 1
+            else:
+                pred[i] = -1
+        # 将预测结果写入pred_y.csv
+        fileWriter.write(test_x, pred, None, None, path='pred_y.csv')
